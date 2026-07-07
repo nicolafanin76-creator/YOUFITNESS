@@ -1,1 +1,468 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouFitness</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --primary: #00adb5;
+            --text-color: #eeeeee;
+            --text-muted: #888888;
+            --accent: #ff5722;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 10px;
+            padding-bottom: 80px;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        h1 { color: var(--primary); font-size: 24px; }
+
+        /* Navigazione Giorni */
+        .nav-days {
+            display: flex;
+            justify-content: space-around;
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .btn-day {
+            background: #333;
+            color: var(--text-color);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .btn-day.active {
+            background: var(--primary);
+            color: #000;
+        }
+
+        /* Contenitore Schede */
+        .day-content {
+            display: none;
+        }
+
+        .day-content.active {
+            display: block;
+        }
+
+        .macro-gruppo {
+            background: #252525;
+            color: var(--primary);
+            padding: 6px 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+
+        /* Card Esercizio */
+        .exercise-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .exercise-name {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        /* Tabella Serie */
+        .series-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .series-table th {
+            text-align: left;
+            color: var(--text-muted);
+            font-size: 12px;
+            padding-bottom: 5px;
+        }
+
+        .series-table td {
+            padding: 6px 4px;
+            vertical-align: middle;
+        }
+
+        .series-row td:first-child {
+            font-weight: bold;
+            width: 10%;
+        }
+
+        .input-weight {
+            width: 70px;
+            background: #333;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 6px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .btn-timer {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            width: 100%;
+        }
+
+        /* Sezione Cardio */
+        .cardio-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .cardio-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cardio-field label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .cardio-field input {
+            background: #333;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        /* Barra Timer Globale Flottante */
+        .timer-overlay {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #000;
+            border-top: 2px solid var(--primary);
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        .timer-text {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .timer-info {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .btn-stop-timer {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>YOUFITNESS</h1>
+
+    <div class="nav-days">
+        <button class="btn-day active" onclick="switchDay(1)">DAY 1</button>
+        <button class="btn-day" onclick="switchDay(2)">DAY 2</button>
+        <button class="btn-day" onclick="switchDay(3)">DAY 3</button>
+        <button class="btn-day" onclick="switchDay(4)">DAY 4</button>
+    </div>
+
+    <div id="workout-container"></div>
+
+    <div class="timer-overlay" id="global-timer-bar" style="display: none;">
+        <div>
+            <div class="timer-info" id="timer-label">Recupero...</div>
+            <div class="timer-text" id="timer-countdown">00s</div>
+        </div>
+        <button class="btn-stop-timer" onclick="stopGlobalTimer()">SALTA</button>
+    </div>
+
+    <script>
+        // Struttura dati completa estratta dal PDF
+        const workoutData = {
+            1: {
+                title: "ADDOMINALI - PETTO - SPALLE - BICIPITI",
+                exercises: [
+                    { name: "HANGING LEG RAISES", group: "ADDOMINALI", series: 3, rep: "15", rec: 90 },
+                    { name: "SPINTE CON BILANCERE SMITH MACHINE PANCA PIANA", group: "PETTO", series: 3, rep: "8/10", rec: 90 },
+                    { name: "SPINTE CON MANUBRI PANCA INCLINATA", group: "PETTO", series: 3, rep: "8/10", rec: 90 },
+                    { name: "CROCI AI CAVI ALTI", group: "PETTO", series: 3, rep: "8/10", rec: 90 },
+                    { name: "ALZATE LATERALI CON MANUBRI", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
+                    { name: "MILITARY PRESS SMITH MACHINE", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
+                    { name: "MACHINE REVERSE FLY", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
+                    { name: "CURL ALTERNATO PANCA INCLINATA", group: "BICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "CURL BILANCERE A Z PANCA SCOTT", group: "BICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "CURL HAMMER AI CAVI BASSI CON CORDA", group: "BICIPITI", series: 3, rep: "8/10", rec: 90 }
+                ],
+                cardio: [
+                    { name: "CLIMBING", defaultMin: "10" },
+                    { name: "WALKING", defaultMin: "15" }
+                ]
+            },
+            2: {
+                title: "ADDOMINALI - SCHIENA - TRICIPITI - AVAMBRACCIO",
+                exercises: [
+                    { name: "ADDOMINAL MACHINE", group: "ADDOMINALI", series: 3, rep: "15", rec: 90 },
+                    { name: "LAT MACHINE AVANTI PRESA LARGA", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
+                    { name: "REMATORE AL CAVO PRESA STRETTA", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
+                    { name: "RACK PULL", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
+                    { name: "LOW ROW MACHINE HAMMER", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
+                    { name: "HIPEREXTENSION", group: "SCHIENA", series: 3, rep: "15", rec: 90 },
+                    { name: "FRENCH PRESS CAVO BASSO", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "FRENCH PRESS CON BILANCERE A Z SU PANCA PIANA", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "PUSH DOWN CAVO ALTO", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "CURL INVERSO CON BILANCERE SU PANCA", group: "AVAMBRACCIO", series: 3, rep: "10", rec: 90 }
+                ],
+                cardio: [
+                    { name: "CLIMBING", defaultMin: "10" },
+                    { name: "WALKING", defaultMin: "15" }
+                ]
+            },
+            3: {
+                title: "ADDOMINALI - GAMBE",
+                exercises: [
+                    { name: "PLANK", group: "ADDOMINALI", series: 3, rep: "60\"", rec: 60 },
+                    { name: "ADDUTTORI", group: "QUADRICIPITI", series: 3, rep: "12", rec: 90 },
+                    { name: "LEG EXTENSION", group: "QUADRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "LEG PRESS 45", group: "QUADRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "PENDULUM SQUAT MACHINE", group: "QUADRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "AFFONDI ALTERNATI CON MANUBRI", group: "QUADRICIPITI", series: 3, rep: "15", rec: 90 },
+                    { name: "CALF PRESSA", group: "POLPACCI", series: 3, rep: "10", rec: 90 },
+                    { name: "CALF SINGOLO IN PIEDI CON MANUBRIO", group: "POLPACCI", series: 3, rep: "10", rec: 90 }
+                ],
+                cardio: [
+                    { name: "WALKING", defaultMin: "20" }
+                ]
+            },
+            4: {
+                title: "ADDOMINALI - PETTO - SPALLE - MIX",
+                exercises: [
+                    { name: "PLANK LATERALE", group: "ADDOMINALI", series: 3, rep: "45\"", rec: 60 },
+                    { name: "CROCI CON MANUBRI PANCA INCLINATA", group: "PETTO", series: 3, rep: "8-10", rec: 90 },
+                    { name: "FLESSIONI A TERRA", group: "PETTO", series: 3, rep: "20", rec: 90 },
+                    { name: "ARNOLD PRESS DA SEDUTI CON MANUBRI", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
+                    { name: "ALZATE POSTERIORI SU PANCA INCLINATA CON MANUBRI", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
+                    { name: "CURL AI CAVI ALTI", group: "BICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "TRAZIONI ALLA SBARRA", group: "DORSALI", series: 3, rep: "6/8", rec: 90 },
+                    { name: "FRENCH PRESS CAVO BASSO", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 }
+                ],
+                cardio: [
+                    { name: "CLIMBING", defaultMin: "5" },
+                    { name: "WALKING", defaultMin: "15", defaultPendenza: "7" }
+                ]
+            }
+        };
+
+        let timerInterval = null;
+
+        // Genera dinamicamente l'interfaccia dell'app
+        function generateApp() {
+            const container = document.getElementById('workout-container');
+            
+            for (let dayId in workoutData) {
+                const dayData = workoutData[dayId];
+                const dayDiv = document.createElement('div');
+                dayDiv.id = `day-${dayId}`;
+                dayDiv.className = `day-content ${dayId == 1 ? 'active' : ''}`;
+
+                let currentGroup = "";
+                let html = `<h2>${dayData.title}</h2>`;
+
+                // Ciclo Esercizi
+                dayData.exercises.forEach((ex, exIndex) => {
+                    if (ex.group !== currentGroup) {
+                        currentGroup = ex.group;
+                        html += `<div class="macro-gruppo">${currentGroup}</div>`;
+                    }
+
+                    html += `
+                    <div class="exercise-card">
+                        <div class="exercise-name">${ex.name}</div>
+                        <table class="series-table">
+                            <thead>
+                                <tr>
+                                    <th>S.</th>
+                                    <th>Rep</th>
+                                    <th>Kg</th>
+                                    <th>Rec</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                    for (let s = 1; s <= ex.series; s++) {
+                        const inputId = `w_${dayId}_${exIndex}_${s}`;
+                        html += `
+                                <tr class="series-row">
+                                    <td>${s}</td>
+                                    <td><span style="color: var(--text-muted); font-size:14px;">${ex.rep}</span></td>
+                                    <td>
+                                        <input type="text" id="${inputId}" class="input-weight" placeholder="--" oninput="saveData('${inputId}', this.value)">
+                                    </td>
+                                    <td>
+                                        <button class="btn-timer" onclick="startGlobalTimer(${ex.rec}, '${ex.name} - S.${s}')">${ex.rec}s</button>
+                                    </td>
+                                </tr>`;
+                    }
+
+                    html += `</tbody></table></div>`;
+                });
+
+                // Sezione Cardio alla fine del giorno
+                html += `<div class="macro-gruppo">CARDIO</div>`;
+                dayData.cardio.forEach((c, cIndex) => {
+                    const minId = `c_${dayId}_${cIndex}_min`;
+                    const pendId = `c_${dayId}_${cIndex}_pend`;
+                    const velId = `c_${dayId}_${cIndex}_vel`;
+                    const distId = `c_${dayId}_${cIndex}_dist`;
+                    
+                    const pendenzaPredefinita = c.defaultPendenza ? c.defaultPendenza : "";
+
+                    html += `
+                    <div class="exercise-card" style="border-left-color: var(--accent);">
+                        <div class="exercise-name">${c.name}</div>
+                        <div class="cardio-inputs">
+                            <div class="cardio-field">
+                                <label>Minuti</label>
+                                <input type="number" id="${minId}" placeholder="${c.defaultMin}" min="5" max="60" step="5" oninput="saveData('${minId}', this.value)">
+                            </div>
+                            <div class="cardio-field">
+                                <label>Pendenza %</label>
+                                <input type="text" id="${pendId}" placeholder="${pendenzaPredefinita}" oninput="saveData('${pendId}', this.value)">
+                            </div>
+                            <div class="cardio-field">
+                                <label>Velocità</label>
+                                <input type="text" id="${velId}" placeholder="km/h" oninput="saveData('${velId}', this.value)">
+                            </div>
+                        </div>
+                        <div class="cardio-inputs" style="margin-top:5px; grid-template-columns: 1fr;">
+                            <div class="cardio-field">
+                                <label>Distanza Km</label>
+                                <input type="text" id="${distId}" placeholder="0.00" oninput="saveData('${distId}', this.value)">
+                            </div>
+                        </div>
+                    </div>`;
+                });
+
+                dayDiv.innerHTML = html;
+                container.appendChild(dayDiv);
+            }
+
+            // Carica i dati precedentemente salvati all'avvio
+            loadSavedData();
+        }
+
+        // Cambia la schermata tra i 4 giorni
+        function switchDay(dayId) {
+            document.querySelectorAll('.day-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.btn-day').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(`day-${dayId}`).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Salva i dati in tempo reale nel LocalStorage
+        function saveData(id, value) {
+            localStorage.setItem(`youfitness_${id}`, value);
+        }
+
+        // Recupera i dati salvati e ripopola gli input text
+        function loadSavedData() {
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                const savedValue = localStorage.getItem(`youfitness_${input.id}`);
+                if (savedValue !== null) {
+                    input.value = savedValue;
+                }
+            });
+        }
+
+        // Funzione per avviare il timer di recupero
+        function startGlobalTimer(seconds, label) {
+            clearInterval(timerInterval);
+            const timerBar = document.getElementById('global-timer-bar');
+            const timerCountdown = document.getElementById('timer-countdown');
+            const timerLabel = document.getElementById('timer-label');
+
+            timerLabel.innerText = label;
+            timerBar.style.display = 'flex';
+
+            let timeLeft = seconds;
+            timerCountdown.innerText = `${timeLeft}s`;
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerCountdown.innerText = `${timeLeft}s`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerCountdown.innerText = "FINE!";
+                    // Vibrazione breve sul telefono se supportata
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                    setTimeout(() => {
+                        timerBar.style.display = 'none';
+                    }, 2000);
+                }
+            }, 1000);
+        }
+
+        // Interrompe manualmente il timer
+        function stopGlobalTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('global-timer-bar').style.display = 'none';
+        }
+
+        // Esegui la generazione dell'applicazione al caricamento della pagina
+        window.onload = generateApp;
+    </script>
+</body>
+</html>
