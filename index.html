@@ -78,7 +78,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 0 10px;
-            padding-bottom: 100px; /* Spazio per non coprire i dati con il timer */
+            padding-bottom: 140px; /* Spazio aumentato per la barra timer più grande */
             -webkit-overflow-scrolling: touch;
         }
 
@@ -202,40 +202,52 @@
             user-select: text;
         }
 
-        /* Barra Timer Globale Flottante Bloccatissima in basso */
+        /* Barra Timer Flottante INGRANDITA */
         .timer-overlay {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: #000;
-            border-top: 2px solid var(--primary);
-            padding: 12px padding-bottom: env(safe-area-inset-bottom);
+            background: #151515;
+            border-top: 3px solid var(--primary);
+            padding: 16px 20px;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom));
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 -6px 20px rgba(0,0,0,0.7);
             z-index: 100;
+            box-sizing: border-box;
         }
 
         .timer-text {
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 36px; /* Molto più grande rispetto a prima */
+            font-weight: 900;
+            color: var(--primary);
+            line-height: 1;
+            margin-top: 4px;
         }
 
         .timer-info {
-            font-size: 12px;
-            color: var(--text-muted);
+            font-size: 13px;
+            color: #fff;
+            font-weight: bold;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .btn-stop-timer {
             background: #d32f2f;
             color: white;
             border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
+            padding: 12px 24px; /* Pulsante più grande da premere al volo */
+            border-radius: 6px;
             font-weight: bold;
+            font-size: 14px;
             cursor: pointer;
+            text-transform: uppercase;
         }
     </style>
 </head>
@@ -442,7 +454,6 @@
             document.getElementById(`day-${dayId}`).classList.add('active');
             event.target.classList.add('active');
             
-            // Torna in cima all'area di scorrimento quando cambi giorno
             document.getElementById('workout-container').scrollTop = 0;
         }
 
