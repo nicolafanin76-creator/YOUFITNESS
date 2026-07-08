@@ -14,7 +14,6 @@
             --accent: #ff5722;
         }
 
-        /* Blocca il movimento elastico e l'oscillazione dello sfondo */
         html, body {
             background-color: var(--bg-color);
             color: var(--text-color);
@@ -28,7 +27,6 @@
             user-select: none;
         }
 
-        /* Struttura fissa a tutto schermo */
         .app-wrapper {
             display: flex;
             flex-direction: column;
@@ -46,7 +44,6 @@
             flex-shrink: 0;
         }
 
-        /* Navigazione Giorni Fissa in alto */
         .nav-days {
             display: flex;
             justify-content: space-around;
@@ -73,12 +70,11 @@
             color: #000;
         }
 
-        /* L'unica zona che può scorrere è il contenuto degli allenamenti */
         .scrollable-content {
             flex: 1;
             overflow-y: auto;
             padding: 0 10px;
-            padding-bottom: 140px; /* Spazio aumentato per la barra timer più grande */
+            padding-bottom: 210px; /* Spazio aumentato per la nuova barra timer con controlli */
             -webkit-overflow-scrolling: touch;
         }
 
@@ -108,7 +104,6 @@
             text-transform: uppercase;
         }
 
-        /* Card Esercizio */
         .exercise-card {
             background: var(--card-bg);
             border-radius: 8px;
@@ -123,7 +118,6 @@
             margin-bottom: 8px;
         }
 
-        /* Tabella Serie */
         .series-table {
             width: 100%;
             border-collapse: collapse;
@@ -143,27 +137,30 @@
 
         .series-row td:first-child {
             font-weight: bold;
-            width: 10%;
+            width: 8%;
         }
 
-        .input-weight {
-            width: 75px;
+        .input-weight, .input-rep-fatte {
             background: #333;
             border: 1px solid #444;
             color: #fff;
-            padding: 6px;
+            padding: 6px 4px;
             border-radius: 4px;
             text-align: center;
-            font-size: 14px;
+            font-size: 13px;
             -webkit-user-select: text;
             user-select: text;
+            box-sizing: border-box;
         }
+
+        .input-weight { width: 55px; }
+        .input-rep-fatte { width: 45px; background: #2a3a3a; border-color: #00adb5; }
 
         .btn-timer {
             background: var(--accent);
             color: white;
             border: none;
-            padding: 6px 10px;
+            padding: 6px 4px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
@@ -171,38 +168,46 @@
             width: 100%;
         }
 
-        /* Sezione Cardio */
+        /* Sezione Cardio Compatta Anti-Oscillazione */
         .cardio-inputs {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 5px;
+            gap: 6px;
             margin-top: 8px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .cardio-field {
             display: flex;
             flex-direction: column;
+            min-width: 0; 
         }
 
         .cardio-field label {
             font-size: 11px;
             color: var(--text-muted);
             margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .cardio-field input {
             background: #333;
             border: 1px solid #444;
             color: #fff;
-            padding: 5px;
+            padding: 6px 2px;
             border-radius: 4px;
             font-size: 13px;
             text-align: center;
             -webkit-user-select: text;
             user-select: text;
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        /* Barra Timer Flottante INGRANDITA */
+        /* Barra Timer Flottante Potenziata */
         .timer-overlay {
             position: fixed;
             bottom: 0;
@@ -210,29 +215,35 @@
             right: 0;
             background: #151515;
             border-top: 3px solid var(--primary);
-            padding: 16px 20px;
-            padding-bottom: calc(16px + env(safe-area-inset-bottom));
+            padding: 12px 15px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 10px;
             box-shadow: 0 -6px 20px rgba(0,0,0,0.7);
             z-index: 100;
             box-sizing: border-box;
         }
 
+        .timer-row-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
         .timer-text {
-            font-size: 36px; /* Molto più grande rispetto a prima */
+            font-size: 34px;
             font-weight: 900;
             color: var(--primary);
             line-height: 1;
-            margin-top: 4px;
         }
 
         .timer-info {
             font-size: 13px;
             color: #fff;
             font-weight: bold;
-            max-width: 200px;
+            max-width: 180px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -242,12 +253,51 @@
             background: #d32f2f;
             color: white;
             border: none;
-            padding: 12px 24px; /* Pulsante più grande da premere al volo */
+            padding: 10px 20px;
             border-radius: 6px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             text-transform: uppercase;
+        }
+
+        /* Controlli Timer Libero */
+        .custom-timer-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #222;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+
+        .custom-timer-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        .custom-timer-select {
+            background: #333;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            outline: none;
+        }
+
+        .btn-start-custom {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -256,7 +306,6 @@
     <div class="app-wrapper">
         <h1>YOUFITNESS</h1>
 
-        <!-- Navigazione dei 4 Allenamenti -->
         <div class="nav-days">
             <button class="btn-day active" onclick="switchDay(1)">DAY 1</button>
             <button class="btn-day" onclick="switchDay(2)">DAY 2</button>
@@ -264,17 +313,27 @@
             <button class="btn-day" onclick="switchDay(4)">DAY 4</button>
         </div>
 
-        <!-- AREA SCROLLABILE CHE NON FA OSCILLARE LO SCHERMO -->
         <div class="scrollable-content" id="workout-container"></div>
     </div>
 
-    <!-- CONTROLLO TIMER FLOTTANTE -->
-    <div class="timer-overlay" id="global-timer-bar" style="display: none;">
-        <div>
-            <div class="timer-info" id="timer-label">Recupero...</div>
-            <div class="timer-text" id="timer-countdown">00s</div>
+    <!-- CONTROLLO TIMER FLOTTANTE SEMPRE VISIBILE PER IL TIMER LIBERO -->
+    <div class="timer-overlay" id="global-timer-bar">
+        <div class="timer-row-top" id="timer-display-status" style="display: none;">
+            <div>
+                <div class="timer-info" id="timer-label">Recupero...</div>
+                <div class="timer-text" id="timer-countdown">00s</div>
+            </div>
+            <button class="btn-stop-timer" onclick="stopGlobalTimer()">SALTA</button>
         </div>
-        <button class="btn-stop-timer" onclick="stopGlobalTimer()">SALTA</button>
+        
+        <!-- CONTROLLO PER IL TIMER LIBERO -->
+        <div class="custom-timer-control">
+            <span class="custom-timer-label">TIMER LIBERO:</span>
+            <select id="custom-seconds-select" class="custom-timer-select">
+                <!-- Generato via JS da 0 a 5 minuti con step 5s -->
+            </select>
+            <button class="btn-start-custom" onclick="startCustomTimer()">AVVIA</button>
+        </div>
     </div>
 
     <script>
@@ -344,7 +403,7 @@
                     { name: "ALZATE POSTERIORI SU PANCA INCLINATA CON MANUBRI[cite: 1]", group: "SPALLE[cite: 1]", series: 3, rep: "8/10[cite: 1]", rec: 90 },
                     { name: "CURL AI CAVI ALTI[cite: 1]", group: "BICIPITI[cite: 1]", series: 3, rep: "8/10[cite: 1]", rec: 90 },
                     { name: "TRAZIONI ALLA SBARRA[cite: 1]", group: "DORSALI[cite: 1]", series: 3, rep: "6/8[cite: 1]", rec: 90 },
-                    { name: "FRENCH PRESS CAVO BASSO[cite: 1]", group: "TRICIPITI[cite: 1]", series: 3, rep: "8/10[cite: 1]", rec: 90 }
+                    { name: "FRENCH PRESS CAVO BASSO CON PANCA", group: "TRICIPITI[cite: 1]", series: 3, rep: "8/10[cite: 1]", rec: 90 }
                 ],
                 cardio: [
                     { name: "CLIMBING[cite: 1]", defaultMin: "5[cite: 1]" },
@@ -354,9 +413,69 @@
         };
 
         let timerInterval = null;
+        let audioCtx = null;
+
+        // Funzione per generare un Beep Sonoro Digitale (funziona ovunque e in cuffia)
+        function playBeep() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime); // Nota acuta
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                // Fa 3 brevi bip consecutivi
+                setTimeout(() => { osc.stop(); }, 200);
+                
+                setTimeout(() => {
+                    const osc2 = audioCtx.createOscillator();
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(880, audioCtx.currentTime);
+                    osc2.connect(gain);
+                    osc2.start();
+                    setTimeout(() => { osc2.stop(); }, 200);
+                }, 400);
+
+                setTimeout(() => {
+                    const osc3 = audioCtx.createOscillator();
+                    osc3.type = 'sine';
+                    osc3.frequency.setValueAtTime(1200, audioCtx.currentTime); // Ultimo bip più alto
+                    osc3.connect(gain);
+                    osc3.start();
+                    setTimeout(() => { osc3.stop(); }, 400);
+                }, 800);
+
+            } catch (e) {
+                console.log("Audio non supportato o bloccato dal browser:", e);
+            }
+        }
+
+        // Popola la selezione del timer libero (0-5 min a intervalli di 5s)
+        function setupCustomTimerOptions() {
+            const select = document.getElementById('custom-seconds-select');
+            for (let totalSec = 5; totalSec <= 300; totalSec += 5) {
+                const min = Math.floor(totalSec / 60);
+                const sec = totalSec % 60;
+                const label = min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+                const opt = document.createElement('option');
+                opt.value = totalSec;
+                opt.innerText = label;
+                if(totalSec === 90) opt.selected = true; // Predefinito 1m 30s
+                select.appendChild(opt);
+            }
+        }
 
         function generateApp() {
             const container = document.getElementById('workout-container');
+            setupCustomTimerOptions();
             
             for (let dayId in workoutData) {
                 const dayData = workoutData[dayId];
@@ -380,7 +499,8 @@
                             <thead>
                                 <tr>
                                     <th>S.</th>
-                                    <th>Rep</th>
+                                    <th>Target</th>
+                                    <th>Fatte</th>
                                     <th>Kg</th>
                                     <th>Rec</th>
                                 </tr>
@@ -388,13 +508,17 @@
                             <tbody>`;
 
                     for (let s = 1; s <= ex.series; s++) {
-                        const inputId = `w_${dayId}_${exIndex}_${s}`;
+                        const inputWeightId = `w_${dayId}_${exIndex}_${s}_kg`;
+                        const inputRepId = `w_${dayId}_${exIndex}_${s}_rep`;
                         html += `
                                 <tr class="series-row">
                                     <td>${s}</td>
-                                    <td><span style="color: var(--text-muted); font-size:13px;">${ex.rep}</span></td>
+                                    <td><span style="color: var(--text-muted); font-size:12px; font-weight:bold;">${ex.rep}</span></td>
                                     <td>
-                                        <input type="text" inputmode="decimal" id="${inputId}" class="input-weight" placeholder="--" oninput="saveData('${inputId}', this.value)">
+                                        <input type="text" inputmode="numeric" pattern="[0-9]*" id="${inputRepId}" class="input-rep-fatte" placeholder="-" oninput="saveData('${inputRepId}', this.value)">
+                                    </td>
+                                    <td>
+                                        <input type="text" inputmode="decimal" id="${inputWeightId}" class="input-weight" placeholder="--" oninput="saveData('${inputWeightId}', this.value)">
                                     </td>
                                     <td>
                                         <button class="btn-timer" onclick="startGlobalTimer(${ex.rec}, '${ex.name} - S.${s}')">${ex.rec}s</button>
@@ -431,8 +555,8 @@
                                 <input type="text" id="${velId}" placeholder="km/h" oninput="saveData('${velId}', this.value)">
                             </div>
                         </div>
-                        <div class="cardio-inputs" style="margin-top:5px; grid-template-columns: 1fr;">
-                            <div class="cardio-field">
+                        <div class="cardio-inputs" style="margin-top:6px;">
+                            <div class="cardio-field" style="grid-column: span 3;">
                                 <label>Distanza Km</label>
                                 <input type="text" id="${distId}" placeholder="0.00" oninput="saveData('${distId}', this.value)">
                             </div>
@@ -472,35 +596,53 @@
         }
 
         function startGlobalTimer(seconds, label) {
+            // Attiva il contesto audio al primo tocco (richiesto dai browser dei telefoni)
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
             clearInterval(timerInterval);
-            const timerBar = document.getElementById('global-timer-bar');
+            const timerStatusDiv = document.getElementById('timer-display-status');
             const timerCountdown = document.getElementById('timer-countdown');
             const timerLabel = document.getElementById('timer-label');
 
             timerLabel.innerText = label;
-            timerBar.style.display = 'flex';
+            timerStatusDiv.style.display = 'flex';
 
             let timeLeft = seconds;
-            timerCountdown.innerText = `${timeLeft}s`;
+            timerCountdown.innerText = formatTimeDisplay(timeLeft);
 
             timerInterval = setInterval(() => {
                 timeLeft--;
-                timerCountdown.innerText = `${timeLeft}s`;
+                timerCountdown.innerText = formatTimeDisplay(timeLeft);
 
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     timerCountdown.innerText = "FINE!";
+                    playBeep(); // Suona l'alert nelle cuffie o altoparlante
                     if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
                     setTimeout(() => {
-                        timerBar.style.display = 'none';
-                    }, 2000);
+                        timerStatusDiv.style.display = 'none';
+                    }, 2500);
                 }
             }, 1000);
         }
 
+        function startCustomTimer() {
+            const select = document.getElementById('custom-seconds-select');
+            const seconds = parseInt(select.value, 10);
+            startGlobalTimer(seconds, "Timer Libero Manuale");
+        }
+
+        function formatTimeDisplay(totalSeconds) {
+            const min = Math.floor(totalSeconds / 60);
+            const sec = totalSeconds % 60;
+            return min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+        }
+
         function stopGlobalTimer() {
             clearInterval(timerInterval);
-            document.getElementById('global-timer-bar').style.display = 'none';
+            document.getElementById('timer-display-status').style.display = 'none';
         }
 
         window.onload = generateApp;
