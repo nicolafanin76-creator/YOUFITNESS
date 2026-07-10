@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>YouFitness</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-color: #121212;
@@ -12,6 +13,7 @@
             --text-color: #eeeeee;
             --text-muted: #888888;
             --accent: #ff5722;
+            --success: #28a745;
         }
 
         html, body {
@@ -48,9 +50,9 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: space-around;
-            gap: 6px;
+            gap: 4px;
             background: var(--card-bg);
-            padding: 10px;
+            padding: 8px;
             margin: 0 10px 10px 10px;
             border-radius: 10px;
             flex-shrink: 0;
@@ -60,11 +62,11 @@
             background: #333;
             color: var(--text-color);
             border: none;
-            padding: 7px 10px;
+            padding: 6px 8px;
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             flex: 1 1 auto;
         }
 
@@ -300,29 +302,75 @@
             cursor: pointer;
         }
 
-        .btn-save-workout {
-            width: 100%;
-            margin-top: 18px;
-            background: var(--primary);
-            color: #000;
+        /* Pulsante Salva Allenamento */
+        .btn-action-save {
+            background: var(--success);
+            color: white;
             border: none;
-            padding: 12px;
+            width: 100%;
+            padding: 14px;
             border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px 0;
+            text-transform: uppercase;
+        }
+
+        /* Grafici e Storico */
+        .select-exercise-chart {
+            width: 100%;
+            background: #333;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .history-card {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+            border-left: 4px solid var(--success);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
             font-weight: bold;
             font-size: 14px;
-            cursor: pointer;
+            border-bottom: 1px solid #333;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
         }
 
-        .history-entry {
-            font-size: 12px;
-            color: var(--text-muted);
-            padding: 8px 0;
-            border-top: 1px solid #333;
+        .history-item-details {
+            font-size: 13px;
+            color: #ccc;
+            line-height: 1.4;
         }
 
-        .history-date {
+        .btn-danger-clear {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
             font-weight: bold;
-            color: var(--primary);
+            width: 100%;
+            margin-top: 20px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -337,6 +385,7 @@
             <button class="btn-day" id="nav-btn-3" onclick="switchDay('3')">DAY 3</button>
             <button class="btn-day" id="nav-btn-4" onclick="switchDay('4')">DAY 4</button>
             <button class="btn-day" id="nav-btn-storico" onclick="switchDay('storico')">STORICO</button>
+            <button class="btn-day" id="nav-btn-grafici" onclick="switchDay('grafici')">GRAFICI</button>
         </div>
 
         <div class="scrollable-content" id="workout-container"></div>
@@ -437,6 +486,7 @@
 
         let timerInterval = null;
         let audioCtx = null;
+        let fitnessChart = null;
 
         function playBeep() {
             try {
@@ -445,37 +495,14 @@
                 }
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
                 gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-                
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-                
                 osc.start();
                 setTimeout(() => { osc.stop(); }, 200);
-                
-                setTimeout(() => {
-                    const osc2 = audioCtx.createOscillator();
-                    osc2.type = 'sine';
-                    osc2.frequency.setValueAtTime(880, audioCtx.currentTime);
-                    osc2.connect(gain);
-                    osc2.start();
-                    setTimeout(() => { osc2.stop(); }, 200);
-                }, 400);
-
-                setTimeout(() => {
-                    const osc3 = audioCtx.createOscillator();
-                    osc3.type = 'sine';
-                    osc3.frequency.setValueAtTime(1200, audioCtx.currentTime); 
-                    osc3.connect(gain);
-                    osc3.start();
-                    setTimeout(() => { osc3.stop(); }, 400);
-                }, 800);
-            } catch (e) {
-                console.log("Audio bloccato:", e);
-            }
+            } catch (e) { console.log(e); }
         }
 
         function setupCustomTimerOptions() {
@@ -499,7 +526,7 @@
             container.innerHTML = "";
             setupCustomTimerOptions();
             
-            // Genera le schede dei giorni
+            // Genera i 4 allenamenti
             for (let dayId in workoutData) {
                 const dayData = workoutData[dayId];
                 const dayDiv = document.createElement('div');
@@ -559,8 +586,6 @@
                     const velId = "c_" + dayId + "_" + cIndex + "_vel";
                     const distId = "c_" + dayId + "_" + cIndex + "_dist";
                     
-                    const pendenzaPredefinita = c.defaultPendenza ? c.defaultPendenza : "";
-
                     html += `
                     <div class="exercise-card" style="border-left-color: var(--accent);">
                         <div class="exercise-name">${c.name}</div>
@@ -571,7 +596,7 @@
                             </div>
                             <div class="cardio-field">
                                 <label>Pendenza %</label>
-                                <input type="text" id="${pendId}" placeholder="${pendenzaPredefinita}" oninput="saveData('${pendId}', this.value)">
+                                <input type="text" id="${pendId}" oninput="saveData('${pendId}', this.value)">
                             </div>
                             <div class="cardio-field">
                                 <label>Velocità</label>
@@ -587,21 +612,39 @@
                     </div>`;
                 });
 
+                // Tasto per salvare la sessione nello Storico
+                html += `<button class="btn-action-save" onclick="logWorkoutSession('${dayId}')">Salva Allenamento di Oggi</button>`;
+
                 dayDiv.innerHTML = html;
                 container.appendChild(dayDiv);
             }
 
-            // Genera la schermata dello Storico
+            // Schermata Storico
             const storicoDiv = document.createElement('div');
             storicoDiv.id = "day-storico";
             storicoDiv.className = "day-content";
-            storicoDiv.innerHTML = `
-                <h2>Cronologia Allenamenti</h2>
-                <div id="history-list">Nessun allenamento salvato nello storico.</div>
-            `;
+            storicoDiv.innerHTML = `<h2>Storico Allenamenti Effettuati</h2><div id="history-render-zone"></div><button class="btn-danger-clear" onclick="clearFullHistory()">Cancella Tutto lo Storico</button>`;
             container.appendChild(storicoDiv);
 
+            // Schermata Grafici
+            const graficiDiv = document.createElement('div');
+            graficiDiv.id = "day-grafici";
+            graficiDiv.className = "day-content";
+            
+            let selectHtml = `<select id="chart-exercise-picker" class="select-exercise-chart" onchange="renderExerciseChart()">
+                                <option value="">-- Seleziona un Esercizio --</option>`;
+            for(let d in workoutData){
+                workoutData[d].exercises.forEach(e => {
+                    selectHtml += `<option value="${e.name}">${e.name} (${workoutData[d].title.split(" - ")[0]})</option>`;
+                });
+            }
+            selectHtml += `</select>`;
+            
+            graficiDiv.innerHTML = `<h2>Andamento nel Tempo (Kg massimi)</h2>${selectHtml}<div class="chart-container"><canvas id="workoutTrendChart"></canvas></div>`;
+            container.appendChild(graficiDiv);
+
             loadSavedData();
+            renderHistoryZone();
         }
 
         function switchDay(dayId) {
@@ -615,6 +658,9 @@
             if(targetBtn) targetBtn.classList.add('active');
             
             document.getElementById('workout-container').scrollTop = 0;
+            
+            if(dayId === 'storico') renderHistoryZone();
+            if(dayId === 'grafici') renderExerciseChart();
         }
 
         function saveData(id, value) {
@@ -631,11 +677,144 @@
             });
         }
 
-        function startGlobalTimer(seconds, label) {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
+        // FUNZIONE PER ARCHIVIARE L'ALLENAMENTO
+        function logWorkoutSession(dayId) {
+            const history = JSON.parse(localStorage.getItem("youfitness_history") || "[]");
+            const dateStr = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit' });
             
+            const sessionData = {
+                date: dateStr,
+                timestamp: Date.now(),
+                dayName: "DAY " + dayId,
+                exercises: []
+            };
+
+            workoutData[dayId].exercises.forEach((ex, exIndex) => {
+                const exRecord = { name: ex.name, series: [] };
+                for (let s = 1; s <= ex.series; s++) {
+                    const wVal = localStorage.getItem(`youfitness_w_${dayId}_${exIndex}_${s}_kg`) || "--";
+                    const rVal = localStorage.getItem(`youfitness_w_${dayId}_${exIndex}_${s}_rep`) || "--";
+                    exRecord.series.push({ s: s, kg: wVal, rep: rVal });
+                }
+                sessionData.exercises.push(exRecord);
+            });
+
+            history.unshift(sessionData); // Mette il più recente all'inizio
+            localStorage.setItem("youfitness_history", JSON.stringify(history));
+            alert("Allenamento salvato correttamente nello storico!");
+            renderHistoryZone();
+        }
+
+        // DISEGNA LA LISTA DEGLI ALLENAMENTI SALVATI
+        function renderHistoryZone() {
+            const zone = document.getElementById("history-render-zone");
+            if (!zone) return;
+            const history = JSON.parse(localStorage.getItem("youfitness_history") || "[]");
+            
+            if (history.length === 0) {
+                zone.innerHTML = "<p style='text-align:center;color:var(--text-muted);'>Nessun allenamento salvato nello storico.</p>";
+                return;
+            }
+
+            let html = "";
+            history.forEach(session => {
+                html += `<div class="history-card">
+                            <div class="history-header">
+                                <span>${session.dayName}</span>
+                                <span style="color:var(--primary);">${session.date}</span>
+                            </div>
+                            <div class="history-item-details">`;
+                session.exercises.forEach(ex => {
+                    let seriesText = [];
+                    ex.series.forEach(s => {
+                        if(s.kg !== "--" || s.rep !== "--") {
+                            seriesText.push(`S.${s.s}: ${s.kg}Kg x ${s.rep}R`);
+                        }
+                    });
+                    if(seriesText.length > 0) {
+                        html += `<strong>${ex.name}</strong><br><span style="color:#aaa; font-size:12px;">${seriesText.join(" | ")}</span><br>`;
+                    }
+                });
+                html += `</div></div>`;
+            });
+            zone.innerHTML = html;
+        }
+
+        // GENERA IL GRAFICO DELLA LINEA DEL TEMPO
+        function renderExerciseChart() {
+            const picker = document.getElementById("chart-exercise-picker");
+            const canvas = document.getElementById("workoutTrendChart");
+            if (!picker || !canvas) return;
+            
+            const exName = picker.value;
+            if (!exName) {
+                if(fitnessChart) fitnessChart.destroy();
+                return;
+            }
+
+            const history = JSON.parse(localStorage.getItem("youfitness_history") || "[]").reverse(); // Ordina dal più vecchio al più recente
+            
+            const labels = [];
+            const dataPoints = [];
+
+            history.forEach(session => {
+                session.exercises.forEach(ex => {
+                    if (ex.name === exName) {
+                        let maxKg = 0;
+                        ex.series.forEach(s => {
+                            const val = parseFloat(s.kg);
+                            if (!isNaN(val) && val > maxKg) {
+                                maxKg = val;
+                            }
+                        });
+                        if (maxKg > 0) {
+                            labels.push(session.date.split(",")[0]); // Solo la data senza l'ora
+                            dataPoints.push(maxKg);
+                        }
+                    }
+                });
+            });
+
+            if (fitnessChart) fitnessChart.destroy();
+
+            fitnessChart = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Max Kg Sollevati',
+                        data: dataPoints,
+                        borderColor: '#00adb5',
+                        backgroundColor: 'rgba(0, 173, 181, 0.2)',
+                        borderWidth: 3,
+                        tension: 0.2,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#ff5722'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { grid: { color: '#333' }, ticks: { color: '#fff' } },
+                        x: { grid: { color: '#333' }, ticks: { color: '#fff' } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function clearFullHistory() {
+            if(confirm("Sei sicuro di voler cancellare TUTTA la cronologia e i grafici per sempre?")) {
+                localStorage.removeItem("youfitness_history");
+                renderHistoryZone();
+                if(fitnessChart) fitnessChart.destroy();
+            }
+        }
+
+        function startGlobalTimer(seconds, label) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             clearInterval(timerInterval);
             const timerStatusDiv = document.getElementById('timer-display-status');
             const timerCountdown = document.getElementById('timer-countdown');
@@ -650,15 +829,12 @@
             timerInterval = setInterval(() => {
                 timeLeft--;
                 timerCountdown.innerText = formatTimeDisplay(timeLeft);
-
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     timerCountdown.innerText = "FINE!";
                     playBeep(); 
                     if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                    setTimeout(() => {
-                        timerStatusDiv.style.display = 'none';
-                    }, 2500);
+                    setTimeout(() => { timerStatusDiv.style.display = 'none'; }, 2500);
                 }
             }, 1000);
         }
@@ -666,8 +842,7 @@
         function startCustomTimer() {
             const select = document.getElementById('custom-seconds-select');
             if(!select) return;
-            const seconds = parseInt(select.value, 10);
-            startGlobalTimer(seconds, "Timer Libero Manuale");
+            startGlobalTimer(parseInt(select.value, 10), "Timer Libero Manuale");
         }
 
         function formatTimeDisplay(totalSeconds) {
