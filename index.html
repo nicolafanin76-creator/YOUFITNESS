@@ -79,7 +79,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 0 10px;
-            padding-bottom: 210px; 
+            padding-bottom: 230px; 
             -webkit-overflow-scrolling: touch;
         }
 
@@ -302,36 +302,37 @@
             cursor: pointer;
         }
 
-        /* Pulsante Salva Allenamento */
+        /* Pulsante Salva e Sezioni Speciali */
         .btn-action-save {
             background: var(--success);
             color: white;
             border: none;
             width: 100%;
-            padding: 14px;
+            padding: 15px;
             border-radius: 8px;
             font-size: 15px;
             font-weight: bold;
             cursor: pointer;
-            margin: 20px 0;
+            margin: 25px 0 10px 0;
             text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
-        /* Grafici e Storico */
         .select-exercise-chart {
             width: 100%;
             background: #333;
             color: #fff;
             border: 1px solid #444;
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
             font-size: 14px;
             margin-bottom: 20px;
+            outline: none;
         }
 
         .chart-container {
             background: #1e1e1e;
-            padding: 10px;
+            padding: 12px;
             border-radius: 8px;
             margin-top: 10px;
         }
@@ -340,7 +341,7 @@
             background: #1e1e1e;
             border-radius: 8px;
             padding: 12px;
-            margin: 10px 0;
+            margin: 12px 0;
             border-left: 4px solid var(--success);
         }
 
@@ -351,26 +352,27 @@
             font-size: 14px;
             border-bottom: 1px solid #333;
             padding-bottom: 6px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .history-item-details {
             font-size: 13px;
-            color: #ccc;
-            line-height: 1.4;
+            color: #ddd;
+            line-height: 1.5;
         }
 
         .btn-danger-clear {
             background: #d32f2f;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
             font-size: 13px;
             font-weight: bold;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 30px;
             cursor: pointer;
+            text-transform: uppercase;
         }
     </style>
 </head>
@@ -526,7 +528,7 @@
             container.innerHTML = "";
             setupCustomTimerOptions();
             
-            // Genera i 4 allenamenti
+            // Creazione schede allenamento
             for (let dayId in workoutData) {
                 const dayData = workoutData[dayId];
                 const dayDiv = document.createElement('div');
@@ -585,7 +587,7 @@
                     const pendId = "c_" + dayId + "_" + cIndex + "_pend";
                     const velId = "c_" + dayId + "_" + cIndex + "_vel";
                     const distId = "c_" + dayId + "_" + cIndex + "_dist";
-                    
+
                     html += `
                     <div class="exercise-card" style="border-left-color: var(--accent);">
                         <div class="exercise-name">${c.name}</div>
@@ -612,8 +614,8 @@
                     </div>`;
                 });
 
-                // Tasto per salvare la sessione nello Storico
-                html += `<button class="btn-action-save" onclick="logWorkoutSession('${dayId}')">Salva Allenamento di Oggi</button>`;
+                // Pulsante Salva inserito ESATTAMENTE sotto la fine di ogni allenamento
+                html += `<button class="btn-action-save" onclick="logWorkoutSessionWithDoubleConfirm('${dayId}')">Salva Allenamento di Oggi</button>`;
 
                 dayDiv.innerHTML = html;
                 container.appendChild(dayDiv);
@@ -677,8 +679,15 @@
             });
         }
 
-        // FUNZIONE PER ARCHIVIARE L'ALLENAMENTO
-        function logWorkoutSession(dayId) {
+        // DOPPIA CONFERMA BLINDATA PER IL SALVATAGGIO
+        function logWorkoutSessionWithDoubleConfirm(dayId) {
+            const primaConferma = confirm("Vuoi salvare l'allenamento di oggi nel tuo Storico?");
+            if (!primaConferma) return; // Se preme annulla, si ferma qui
+
+            const secondaConferma = confirm("Sei sicuro al 100%? Questo registrerà tutti i kg e le ripetizioni inseriti.");
+            if (!secondaConferma) return; // Se preme annulla alla seconda, si ferma
+
+            // Se supera entrambe le conferme, salva
             const history = JSON.parse(localStorage.getItem("youfitness_history") || "[]");
             const dateStr = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit' });
             
@@ -699,13 +708,12 @@
                 sessionData.exercises.push(exRecord);
             });
 
-            history.unshift(sessionData); // Mette il più recente all'inizio
+            history.unshift(sessionData); 
             localStorage.setItem("youfitness_history", JSON.stringify(history));
-            alert("Allenamento salvato correttamente nello storico!");
+            alert("Allenamento archiviato con successo nello storico!");
             renderHistoryZone();
         }
 
-        // DISEGNA LA LISTA DEGLI ALLENAMENTI SALVATI
         function renderHistoryZone() {
             const zone = document.getElementById("history-render-zone");
             if (!zone) return;
@@ -740,7 +748,6 @@
             zone.innerHTML = html;
         }
 
-        // GENERA IL GRAFICO DELLA LINEA DEL TEMPO
         function renderExerciseChart() {
             const picker = document.getElementById("chart-exercise-picker");
             const canvas = document.getElementById("workoutTrendChart");
@@ -752,8 +759,7 @@
                 return;
             }
 
-            const history = JSON.parse(localStorage.getItem("youfitness_history") || "[]").reverse(); // Ordina dal più vecchio al più recente
-            
+            const history = JSON.parse(localStorage.getItem("youfitness_history") || "[]").reverse(); 
             const labels = [];
             const dataPoints = [];
 
@@ -763,12 +769,10 @@
                         let maxKg = 0;
                         ex.series.forEach(s => {
                             const val = parseFloat(s.kg);
-                            if (!isNaN(val) && val > maxKg) {
-                                maxKg = val;
-                            }
+                            if (!isNaN(val) && val > maxKg) { maxKg = val; }
                         });
                         if (maxKg > 0) {
-                            labels.push(session.date.split(",")[0]); // Solo la data senza l'ora
+                            labels.push(session.date.split(" ")[0]); 
                             dataPoints.push(maxKg);
                         }
                     }
@@ -798,9 +802,7 @@
                         y: { grid: { color: '#333' }, ticks: { color: '#fff' } },
                         x: { grid: { color: '#333' }, ticks: { color: '#fff' } }
                     },
-                    plugins: {
-                        legend: { display: false }
-                    }
+                    plugins: { legend: { display: false } }
                 }
             });
         }
