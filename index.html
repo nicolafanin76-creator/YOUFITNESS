@@ -410,9 +410,6 @@
     </div>
 
     <script>
-        // Numero di versione per forzare l'auto-aggiornamento della cache
-        const APP_VERSION = "4.2";
-
         const workoutData = {
             1: {
                 title: "ADDOMINALI - PETTO - SPALLE - BICIPITI",
@@ -492,29 +489,6 @@
         let audioCtx = null;
         let fitnessChart = null;
 
-        function checkCacheUpdate() {
-            const currentSavedVersion = localStorage.getItem("youfitness_version");
-            if (currentSavedVersion !== APP_VERSION) {
-                localStorage.setItem("youfitness_version", APP_VERSION);
-                window.location.reload(true);
-            }
-        }
-
-        function playBeep() {
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
-                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                setTimeout(() => { osc.stop(); }, 200);
-            } catch (e) { console.log(e); }
-        }
-
         function setupCustomTimerOptions() {
             const select = document.getElementById('custom-seconds-select');
             if (!select) return;
@@ -532,7 +506,6 @@
         }
 
         function generateApp() {
-            checkCacheUpdate();
             const container = document.getElementById('workout-container');
             container.innerHTML = "";
             setupCustomTimerOptions();
@@ -577,3 +550,291 @@
                                     <td>
                                         <input type="text" inputmode="numeric" pattern="[0-9]*" id="${inputRepId}" class="input-rep-fatte" placeholder="-" oninput="saveData('${inputRepId}', this.value)">
                                     </td>
+                                    <td>
+                                        <input type="text" inputmode="decimal" id="${inputWeightId}" class="input-weight" placeholder="--" oninput="saveData('${inputWeightId}', this.value)">
+                                    </td>
+                                    <td>
+                                        <button class="btn-timer" onclick="startGlobalTimer(${ex.rec}, '${ex.name.replace(/'/g, "\\'")} - S.${s}')">${ex.rec}s</button>
+                                    </td>
+                                </tr>`;
+                    }
+
+                    html += `</tbody></table></div>`;
+                });
+
+                html += `<div class="macro-gruppo">CARDIO</div>`;
+                dayData.cardio.forEach((c, cIndex) => {
+                    const minId = "c_" + dayId + "_" + cIndex + "_min";
+                    const pendId = "c_" + dayId + "_" + cIndex + "_pend";
+                    const velId = "c_" + dayId + "_" + cIndex + "_vel";
+                    const distId = "c_" + dayId + "_" + cIndex + "_dist";
+
+                    html += `
+                    <div class="exercise-card" style="border-left-color: var(--accent);">
+                        <div class="exercise-name">${c.name}</div>
+                        <div class="cardio-inputs">
+                            <div class="cardio-field">
+                                <label>Minuti</label>
+                                <input type="number" id="${minId}" placeholder="${c.defaultMin}" min="5" max="60" step="5" oninput="saveData('${minId}', this.value)">
+                            </div>
+                            <div class="cardio-field">
+                                <label>Pendenza %</label>
+                                <input type="text" id="${pendId}" oninput="saveData('${pendId}', this.value)">
+                            </div>
+                            <div class="cardio-field">
+                                <label>Velocità</label>
+                                <input type="text" id="${velId}" placeholder="km/h" oninput="saveData('${velId}', this.value)">
+                            </div>
+                        </div>
+                        <div class="cardio-inputs" style="margin-top:6px;">
+                            <div class="cardio-field" style="grid-column: span 3;">
+                                <label>Distanza Km</label>
+                                <input type="text" id="${distId}" placeholder="0.00" oninput="saveData('${distId}', this.value)">
+                            </div>
+                        </div>
+                    </div>`;
+                });
+
+                html += `<button class="btn-action-save" onclick="logWorkoutSessionWithDoubleConfirm('${dayId}')">Salva Allenamento di Oggi</button>`;
+
+                dayDiv.innerHTML = html;
+                container.appendChild(dayDiv);
+            }
+
+            const storicoDiv = document.createElement('div');
+            storicoDiv.id = "day-storico";
+            storicoDiv.className = "day-content";
+            storicoDiv.innerHTML = `<h2>Storico Allenamenti Effettuati</h2><div id="history-render-zone"></div><button class="btn-danger-clear" onclick="clearFullHistory()">Cancella Tutto lo Storico</button>`;
+            container.appendChild(storicoDiv);
+
+            const graficiDiv = document.createElement('div');
+            graficiDiv.id = "day-grafici";
+            graficiDiv.className = "day-content";
+            
+            let selectHtml = `<select id="chart-exercise-picker" class="select-exercise-chart" onchange="renderExerciseChart()">
+                                <option value="">-- Seleziona un Esercizio --</option>`;
+            for(let d in workoutData){
+                workoutData[d].exercises.forEach(e => {
+                    selectHtml += `<option value="${e.name}">${e.name} (${workoutData[d].title.split(" - ")[0]})</option>`;
+                });
+            }
+            selectHtml += `</select>`;
+            
+            graficiDiv.innerHTML = `<h2>Andamento nel Tempo (Kg massimi)</h2>${selectHtml}<div class="chart-container"><canvas id="workoutTrendChart"></canvas></div>`;
+            container.appendChild(graficiDiv);
+
+            loadSavedData();
+            renderHistoryZone();
+        }
+
+        function switchDay(dayId) {
+            document.querySelectorAll('.day-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.btn-day').forEach(el => el.classList.remove('active'));
+            
+            const targetContent = document.getElementById("day-" + dayId);
+            if(targetContent) targetContent.classList.add('active');
+            
+            const targetBtn = document.getElementById("nav-btn-" + dayId);
+            if(targetBtn) targetBtn.classList.add('active');
+            
+            document.getElementById('workout-container').scrollTop = 0;
+            
+            if(dayId === 'storico') renderHistoryZone();
+            if(dayId === 'grafici') renderExerciseChart();
+        }
+
+        function saveData(id, value) {
+            localStorage.setItem("youfitness_" + id, value);
+        }
+
+        function loadSavedData() {
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                const savedValue = localStorage.getItem("youfitness_" + input.id);
+                if (savedValue !== null) {
+                    input.value = savedValue;
+                }
+            });
+        }
+
+        function logWorkoutSessionWithDoubleConfirm(dayId) {
+            const primaConferma = confirm("Vuoi salvare l'allenamento di oggi nel tuo Storico?");
+            if (!primaConferma) return;
+
+            const secondaConferma = confirm("Sei sicuro al 100%? Questo registrerà tutti i kg e le ripetizioni inseriti.");
+            if (!secondaConferma) return;
+
+            const history = JSON.parse(localStorage.getItem("youfitness_history") || "[]");
+            const dateStr = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+            
+            const sessionData = {
+                date: dateStr,
+                timestamp: Date.now(),
+                dayName: "DAY " + dayId,
+                exercises: []
+            };
+
+            workoutData[dayId].exercises.forEach((ex, exIndex) => {
+                const exRecord = { name: ex.name, series: [] };
+                for (let s = 1; s <= ex.series; s++) {
+                    const wVal = localStorage.getItem(`youfitness_w_${dayId}_${exIndex}_${s}_kg`) || "--";
+                    const rVal = localStorage.getItem(`youfitness_w_${dayId}_${exIndex}_${s}_rep`) || "--";
+                    exRecord.series.push({ s: s, kg: wVal, rep: rVal });
+                }
+                sessionData.exercises.push(exRecord);
+            });
+
+            history.unshift(sessionData); 
+            localStorage.setItem("youfitness_history", JSON.stringify(history));
+            alert("Allenamento archiviato con successo nello storico!");
+            renderHistoryZone();
+        }
+
+        function renderHistoryZone() {
+            const zone = document.getElementById("history-render-zone");
+            if (!zone) return;
+            const history = JSON.parse(localStorage.getItem("youfitness_history") || "[]");
+            
+            if (history.length === 0) {
+                zone.innerHTML = "<p style='text-align:center;color:var(--text-muted);'>Nessun allenamento salvato nello storico.</p>";
+                return;
+            }
+
+            let html = "";
+            history.forEach(session => {
+                html += `<div class="history-card">
+                            <div class="history-header">
+                                <span>${session.dayName}</span>
+                                <span style="color:var(--primary);">${session.date}</span>
+                            </div>
+                            <div class="history-item-details">`;
+                session.exercises.forEach(ex => {
+                    let seriesText = [];
+                    ex.series.forEach(s => {
+                        if(s.kg !== "--" || s.rep !== "--") {
+                            seriesText.push(`S.${s.s}: ${s.kg}Kg x ${s.rep}R`);
+                        }
+                    });
+                    if(seriesText.length > 0) {
+                        html += `<strong>${ex.name}</strong><br><span style="color:#aaa; font-size:12px;">${seriesText.join(" | ")}</span><br>`;
+                    }
+                });
+                html += `</div></div>`;
+            });
+            zone.innerHTML = html;
+        }
+
+        function renderExerciseChart() {
+            const picker = document.getElementById("chart-exercise-picker");
+            const canvas = document.getElementById("workoutTrendChart");
+            if (!picker || !canvas) return;
+            
+            const exName = picker.value;
+            if (!exName) {
+                if(fitnessChart) fitnessChart.destroy();
+                return;
+            }
+
+            const history = JSON.parse(localStorage.getItem("youfitness_history") || "[]").reverse(); 
+            const labels = [];
+            const dataPoints = [];
+
+            history.forEach(session => {
+                session.exercises.forEach(ex => {
+                    if (ex.name === exName) {
+                        let maxKg = 0;
+                        ex.series.forEach(s => {
+                            const val = parseFloat(s.kg);
+                            if (!isNaN(val) && val > maxKg) { maxKg = val; }
+                        });
+                        if (maxKg > 0) {
+                            labels.push(session.date.split(" ")[0]); 
+                            dataPoints.push(maxKg);
+                        }
+                    }
+                });
+            });
+
+            if (fitnessChart) fitnessChart.destroy();
+
+            fitnessChart = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Max Kg Sollevati',
+                        data: dataPoints,
+                        borderColor: '#00adb5',
+                        backgroundColor: 'rgba(0, 173, 181, 0.2)',
+                        borderWidth: 3,
+                        tension: 0.2,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#ff5722'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { grid: { color: '#333' }, ticks: { color: '#fff' } },
+                        x: { grid: { color: '#333' }, ticks: { color: '#fff' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function clearFullHistory() {
+            if(confirm("Sei sicuro di voler cancellare TUTTA la cronologia e i grafici per sempre?")) {
+                localStorage.removeItem("youfitness_history");
+                renderHistoryZone();
+                if(fitnessChart) fitnessChart.destroy();
+            }
+        }
+
+        function startGlobalTimer(seconds, label) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            clearInterval(timerInterval);
+            const timerStatusDiv = document.getElementById('timer-display-status');
+            const timerCountdown = document.getElementById('timer-countdown');
+            const timerLabel = document.getElementById('timer-label');
+
+            timerLabel.innerText = label;
+            timerStatusDiv.style.display = 'flex';
+
+            let timeLeft = seconds;
+            timerCountdown.innerText = formatTimeDisplay(timeLeft);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerCountdown.innerText = formatTimeDisplay(timeLeft);
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerCountdown.innerText = "FINE!";
+                    playBeep(); 
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                    setTimeout(() => { timerStatusDiv.style.display = 'none'; }, 2500);
+                }
+            }, 1000);
+        }
+
+        function startCustomTimer() {
+            const select = document.getElementById('custom-seconds-select');
+            if(!select) return;
+            startGlobalTimer(parseInt(select.value, 10), "Timer Libero Manuale");
+        }
+
+        function formatTimeDisplay(totalSeconds) {
+            const min = Math.floor(totalSeconds / 60);
+            const sec = totalSeconds % 60;
+            return min > 0 ? min + "m " + sec + "s" : sec + "s";
+        }
+
+        function stopGlobalTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer-display-status').style.display = 'none';
+        }
+
+        window.onload = generateApp;
+    </script>
+</body>
+</html>
