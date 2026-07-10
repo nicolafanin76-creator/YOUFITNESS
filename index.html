@@ -410,6 +410,9 @@
     </div>
 
     <script>
+        // Numero di versione per forzare l'auto-aggiornamento della cache
+        const APP_VERSION = "4.2";
+
         const workoutData = {
             1: {
                 title: "ADDOMINALI - PETTO - SPALLE - BICIPITI",
@@ -489,6 +492,29 @@
         let audioCtx = null;
         let fitnessChart = null;
 
+        function checkCacheUpdate() {
+            const currentSavedVersion = localStorage.getItem("youfitness_version");
+            if (currentSavedVersion !== APP_VERSION) {
+                localStorage.setItem("youfitness_version", APP_VERSION);
+                window.location.reload(true);
+            }
+        }
+
+        function playBeep() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                setTimeout(() => { osc.stop(); }, 200);
+            } catch (e) { console.log(e); }
+        }
+
         function setupCustomTimerOptions() {
             const select = document.getElementById('custom-seconds-select');
             if (!select) return;
@@ -506,6 +532,7 @@
         }
 
         function generateApp() {
+            checkCacheUpdate();
             const container = document.getElementById('workout-container');
             container.innerHTML = "";
             setupCustomTimerOptions();
