@@ -264,3 +264,502 @@
             color: white;
             border: none;
             padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .custom-timer-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #222;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+
+        .custom-timer-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        .custom-timer-select {
+            background: #333;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            outline: none;
+        }
+
+        .btn-start-custom {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .btn-save-workout {
+            width: 100%;
+            margin-top: 18px;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .save-confirm {
+            text-align: center;
+            color: var(--primary);
+            font-size: 12px;
+            margin-top: 6px;
+            min-height: 16px;
+        }
+
+        .btn-clear-history {
+            width: 100%;
+            margin-bottom: 12px;
+            background: #d32f2f;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .history-entry {
+            font-size: 12px;
+            color: var(--text-muted);
+            padding: 5px 0;
+            border-top: 1px solid #333;
+        }
+
+        .history-date {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-wrapper">
+        <h1>YOUFITNESS</h1>
+
+        <div class="nav-days">
+            <button class="btn-day active" onclick="switchDay('1')">DAY 1</button>
+            <button class="btn-day" onclick="switchDay('2')">DAY 2</button>
+            <button class="btn-day" onclick="switchDay('3')">DAY 3</button>
+            <button class="btn-day" onclick="switchDay('4')">DAY 4</button>
+            <button class="btn-day" onclick="switchDay('storico')">STORICO</button>
+        </div>
+
+        <div class="scrollable-content" id="workout-container"></div>
+    </div>
+
+    <div class="timer-overlay" id="global-timer-bar">
+        <div class="timer-row-top" id="timer-display-status" style="display: none;">
+            <div>
+                <div class="timer-info" id="timer-label">Recupero...</div>
+                <div class="timer-text" id="timer-countdown">00s</div>
+            </div>
+            <button class="btn-stop-timer" onclick="stopGlobalTimer()">SALTA</button>
+        </div>
+        
+        <div class="custom-timer-control">
+            <span class="custom-timer-label">TIMER LIBERO:</span>
+            <select id="custom-seconds-select" class="custom-timer-select">
+            </select>
+            <button class="btn-start-custom" onclick="startCustomTimer()">AVVIA</button>
+        </div>
+    </div>
+
+    <script>
+        const workoutData = {
+            1: {
+                title: "ADDOMINALI - PETTO - SPALLE - BICIPITI",
+                exercises: [
+                    { name: "HANGING LEG RAISES", group: "ADDOMINALI", series: 3, rep: "15", rec: 90 },
+                    { name: "SPINTE CON BILANCERE SMITH MACHINE PANCA PIANA", group: "PETTO", series: 3, rep: "8/10", rec: 90 },
+                    { name: "SPINTE CON MANUBRI PANCA INCLINATA", group: "PETTO", series: 3, rep: "8/10", rec: 90 },
+                    { name: "CROCI AI CAVI ALTI", group: "PETTO", series: 3, rep: "8/10", rec: 90 },
+                    { name: "ALZATE LATERALI CON MANUBRI", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
+                    { name: "MILITARY PRESS SMITH MACHINE", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
+                    { name: "MACHINE REVERSE FLY", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
+                    { name: "CURL ALTERNATO PANCA INCLINATA", group: "BICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "CURL BILANCERE A Z PANCA SCOTT", group: "BICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "CURL HAMMER AI CAVI BASSI CON CORDA", group: "BICIPITI", series: 3, rep: "8/10", rec: 90 }
+                ],
+                cardio: [
+                    { name: "CLIMBING", defaultMin: "10" },
+                    { name: "WALKING", defaultMin: "15" }
+                ]
+            },
+            2: {
+                title: "ADDOMINALI - SCHIENA - TRICIPITI - AVAMBRACCIO",
+                exercises: [
+                    { name: "ADDOMINAL MACHINE", group: "ADDOMINALI", series: 3, rep: "15", rec: 90 },
+                    { name: "LAT MACHINE AVANTI PRESA LARGA", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
+                    { name: "REMATORE AL CAVO PRESA STRETTA", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
+                    { name: "RACK PULL", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
+                    { name: "LOW ROW MACHINE HAMMER", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
+                    { name: "HIPEREXTENSION", group: "SCHIENA", series: 3, rep: "15", rec: 90 },
+                    { name: "FRENCH PRESS CAVO BASSO", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "FRENCH PRESS CON BILANCERE A Z SU PANCA PIANA", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "PUSH DOWN CAVO ALTO", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "CURL INVERSO CON BILANCERE SU PANCA", group: "AVAMBRACCIO", series: 3, rep: "10", rec: 90 }
+                ],
+                cardio: [
+                    { name: "CLIMBING", defaultMin: "10" },
+                    { name: "WALKING", defaultMin: "15" }
+                ]
+            },
+            3: {
+                title: "ADDOMINALI - GAMBE",
+                exercises: [
+                    { name: "PLANK", group: "ADDOMINALI", series: 3, rep: "60\"", rec: 60 },
+                    { name: "ADDUTTORI", group: "QUADRICIPITI", series: 3, rep: "12", rec: 90 },
+                    { name: "ABDUTTORI", group: "QUADRICIPITI", series: 3, rep: "12", rec: 90 },
+                    { name: "LEG EXTENSION", group: "QUADRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "LEG PRESS 45", group: "QUADRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "PENDULUM SQUAT MACHINE", group: "QUADRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "AFFONDI ALTERNATI CON MANUBRI", group: "QUADRICIPITI", series: 3, rep: "15", rec: 90 },
+                    { name: "LEG CURL", group: "QUADRICIPITI", series: 3, rep: "10", rec: 90 },
+                    { name: "CALF PRESSA", group: "POLPACCI", series: 3, rep: "10", rec: 90 }
+                ],
+                cardio: [
+                    { name: "WALKING", defaultMin: "20" }
+                ]
+            },
+            4: {
+                title: "ADDOMINALI - PETTO - SPALLE - MIX",
+                exercises: [
+                    { name: "PLANK LATERALE", group: "ADDOMINALI", series: 3, rep: "45\"", rec: 60 },
+                    { name: "CROCI CON MANUBRI PANCA INCLINATA", group: "PETTO", series: 3, rep: "8-10", rec: 90 },
+                    { name: "FLESSIONI A TERRA", group: "PETTO", series: 3, rep: "20", rec: 90 },
+                    { name: "ARNOLD PRESS DA SEDUTI CON MANUBRI", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
+                    { name: "ALZATE POSTERIORI SU PANCA INCLINATA CON MANUBRI", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
+                    { name: "CURL AI CAVI ALTI", group: "BICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "TRAZIONI ALLA SBARRA", group: "DORSALI", series: 3, rep: "6/8", rec: 90 },
+                    { name: "FRENCH PRESS CAVO BASSO CON PANCA", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 }
+                ],
+                cardio: [
+                    { name: "CLIMBING", defaultMin: "5" },
+                    { name: "WALKING", defaultMin: "15", defaultPendenza: "7" }
+                ]
+            }
+        };
+
+        let timerInterval = null;
+        let audioCtx = null;
+
+        function escJs(str) {
+            return String(str).replace(/'/g, "\\'");
+        }
+
+        function getJSON(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : fallback;
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        function setJSON(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (e) {
+                console.log("Errore salvataggio:", e);
+            }
+        }
+
+        function playBeep() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                setTimeout(() => { osc.stop(); }, 200);
+                
+                setTimeout(() => {
+                    const osc2 = audioCtx.createOscillator();
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(880, audioCtx.currentTime);
+                    osc2.connect(gain);
+                    osc2.start();
+                    setTimeout(() => { osc2.stop(); }, 200);
+                }, 400);
+
+                setTimeout(() => {
+                    const osc3 = audioCtx.createOscillator();
+                    osc3.type = 'sine';
+                    osc3.frequency.setValueAtTime(1200, audioCtx.currentTime); 
+                    osc3.connect(gain);
+                    osc3.start();
+                    setTimeout(() => { osc3.stop(); }, 400);
+                }, 800);
+
+            } catch (e) {
+                console.log("Audio bloccato:", e);
+            }
+        }
+
+        function ensureNotificationPermission() {
+            if (!("Notification" in window)) return;
+            if (Notification.permission === "default") {
+                Notification.requestPermission().catch(() => {});
+            }
+        }
+
+        function fireNotification(title, body) {
+            try {
+                if ("Notification" in window && Notification.permission === "granted") {
+                    new Notification(title, { body: body, tag: 'youfitness-timer' });
+                }
+            } catch (e) {
+                console.log("Notifica non disponibile:", e);
+            }
+        }
+
+        function setupCustomTimerOptions() {
+            const select = document.getElementById('custom-seconds-select');
+            if (!select) return;
+            for (let totalSec = 5; totalSec <= 300; totalSec += 5) {
+                const min = Math.floor(totalSec / 60);
+                const sec = totalSec % 60;
+                const label = min > 0 ? min + "m " + sec + "s" : sec + "s";
+                const opt = document.createElement('option');
+                opt.value = totalSec;
+                opt.innerText = label;
+                if (totalSec === 90) opt.selected = true; 
+                select.appendChild(opt);
+            }
+        }
+
+        function cleanOldCorruptedCache() {
+            try {
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('youfitness_') && !key.startsWith('youfitness_history') && !key.startsWith('youfitness_active_timer') && !key.startsWith('youfitness_cardio_')) {
+                        const val = localStorage.getItem(key);
+                        if (val && (val.includes('cite') || val.includes('[') || val.includes(']'))) {
+                            keysToRemove.push(key);
+                        }
+                    }
+                }
+                keysToRemove.forEach(k => localStorage.removeItem(k));
+            } catch (e) {
+                console.log("Errore pulizia cache:", e);
+            }
+        }
+
+        // ---------- TIMER (recupero + cardio), persistente anche in background/riapertura ----------
+
+        function saveActiveTimer(endTime, label, kind, meta) {
+            setJSON('youfitness_active_timer', { endTime: endTime, label: label, kind: kind, meta: meta || null });
+        }
+
+        function clearActiveTimer() {
+            localStorage.removeItem('youfitness_active_timer');
+        }
+
+        function getActiveTimer() {
+            return getJSON('youfitness_active_timer', null);
+        }
+
+        function startGlobalTimer(seconds, label, kind, meta) {
+            kind = kind || 'recupero';
+            ensureNotificationPermission();
+            if (!audioCtx) {
+                try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+            }
+            const endTime = Date.now() + seconds * 1000;
+            saveActiveTimer(endTime, label, kind, meta);
+            startCountdownDisplay(endTime, label, kind, meta);
+        }
+
+        function startCountdownDisplay(endTime, label, kind, meta) {
+            clearInterval(timerInterval);
+            const timerStatusDiv = document.getElementById('timer-display-status');
+            const timerCountdown = document.getElementById('timer-countdown');
+            const timerLabel = document.getElementById('timer-label');
+
+            timerLabel.innerText = label;
+            timerStatusDiv.style.display = 'flex';
+
+            function tick() {
+                const remaining = Math.round((endTime - Date.now()) / 1000);
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    timerCountdown.innerText = "FINE!";
+                    playBeep();
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                    fireNotification('YouFitness', label + ' completato!');
+                    completeTimer(kind, meta);
+                    clearActiveTimer();
+                    setTimeout(() => {
+                        timerStatusDiv.style.display = 'none';
+                    }, 2500);
+                } else {
+                    timerCountdown.innerText = formatTimeDisplay(remaining);
+                }
+            }
+            tick();
+            timerInterval = setInterval(tick, 1000);
+        }
+
+        function resumeTimerIfActive() {
+            const active = getActiveTimer();
+            if (!active) return;
+            const remaining = active.endTime - Date.now();
+            if (remaining <= 0) {
+                const timerStatusDiv = document.getElementById('timer-display-status');
+                const timerCountdown = document.getElementById('timer-countdown');
+                const timerLabel = document.getElementById('timer-label');
+                timerLabel.innerText = active.label;
+                timerCountdown.innerText = "FINE!";
+                timerStatusDiv.style.display = 'flex';
+                playBeep();
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                fireNotification('YouFitness', active.label + ' completato!');
+                completeTimer(active.kind, active.meta);
+                clearActiveTimer();
+                setTimeout(() => { timerStatusDiv.style.display = 'none'; }, 4000);
+            } else {
+                startCountdownDisplay(active.endTime, active.label, active.kind, active.meta);
+            }
+        }
+
+        function stopGlobalTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer-display-status').style.display = 'none';
+            clearActiveTimer();
+        }
+
+        function startCustomTimer() {
+            const select = document.getElementById('custom-seconds-select');
+            if (!select) return;
+            const seconds = parseInt(select.value, 10);
+            startGlobalTimer(seconds, "Timer Libero Manuale", 'recupero', null);
+        }
+
+        function formatTimeDisplay(totalSeconds) {
+            const min = Math.floor(totalSeconds / 60);
+            const sec = totalSeconds % 60;
+            return min > 0 ? min + "m " + sec + "s" : sec + "s";
+        }
+
+        // ---------- CARDIO: timer + calcolo automatico velocità ----------
+
+        function startCardioTimer(minId, distId, velId, label) {
+            const minInput = document.getElementById(minId);
+            if (!minInput) return;
+            const minutiStr = (minInput.value !== '' ? minInput.value : minInput.placeholder);
+            const minuti = parseFloat(minutiStr);
+            if (!minuti || minuti <= 0) {
+                alert('Inserisci i minuti prima di avviare il timer.');
+                return;
+            }
+            localStorage.removeItem('youfitness_cardio_done_' + distId);
+            const seconds = Math.round(minuti * 60);
+            startGlobalTimer(seconds, label, 'cardio', { distId: distId, velId: velId, minuti: minuti });
+        }
+
+        function completeTimer(kind, meta) {
+            if (kind === 'cardio' && meta) {
+                localStorage.setItem('youfitness_cardio_done_' + meta.distId, '1');
+                localStorage.setItem('youfitness_cardio_minuti_' + meta.distId, meta.minuti);
+                tryComputeVelocity(meta.distId, meta.velId);
+            }
+        }
+
+        function tryComputeVelocity(distId, velId) {
+            const done = localStorage.getItem('youfitness_cardio_done_' + distId) === '1';
+            if (!done) return;
+            const minutiStr = localStorage.getItem('youfitness_cardio_minuti_' + distId);
+            const minuti = parseFloat(minutiStr);
+            const distInput = document.getElementById(distId);
+            const velInput = document.getElementById(velId);
+            if (!distInput || !velInput || !minuti) return;
+            const distStr = (distInput.value || '').replace(',', '.');
+            const dist = parseFloat(distStr);
+            if (isNaN(dist) || dist <= 0) return;
+            const hours = minuti / 60;
+            if (hours <= 0) return;
+            const vel = (dist / hours).toFixed(2);
+            velInput.value = vel;
+            saveData(velId, vel);
+        }
+
+        // ---------- GENERAZIONE APP ----------
+
+        function generateApp() {
+            cleanOldCorruptedCache();
+            
+            const container = document.getElementById('workout-container');
+            setupCustomTimerOptions();
+            
+            for (let dayId in workoutData) {
+                const dayData = workoutData[dayId];
+                const dayDiv = document.createElement('div');
+                dayDiv.id = "day-" + dayId;
+                dayDiv.className = "day-content " + (dayId == 1 ? 'active' : '');
+
+                let currentGroup = "";
+                let html = "<h2>" + dayData.title + "</h2>";
+
+                dayData.exercises.forEach((ex, exIndex) => {
+                    if (ex.group !== currentGroup) {
+                        currentGroup = ex.group;
+                        html += "<div class='macro-gruppo'>" + currentGroup + "</div>";
+                    }
+
+                    html += `
+                    <div class="exercise-card">
+                        <div class="exercise-name">${ex.name}</div>
+                        <table class="series-table">
+                            <thead>
+                                <tr>
+                                    <th>S.</th>
+                                    <th>Target</th>
+                                    <th>Fatte</th>
+                                    <th>Kg</th>
+                                    <th>Rec</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                    for (let s = 1; s <= ex.series; s++) {
+                        const inputWeightId = "w_" + dayId + "_" + exIndex + "_" + s + "_kg";
+                        const inputRepId = "w_" + dayId + "_" + exIndex + "_" + s + "_rep";
+                        html += `
+                                <tr class="series-row">
+                                    <td>${s}</td>
+                                    <td><span style="color: var(--text-muted); font-size:12px; font-weight:bold;">${ex.rep}</span></td>
+                                    <td>
