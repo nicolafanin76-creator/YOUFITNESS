@@ -412,75 +412,67 @@
     <script>
         const workoutData = {
             "1": {
-                title: "ADDOMINALI - PETTO - SPALLE - BICIPITI",
+                title: "PETTO - SPALLE - BICIPITI",
                 exercises: [
-                    { name: "HANGING LEG RAISES", group: "ADDOMINALI", series: 3, rep: "15", rec: 90 },
-                    { name: "SPINTE CON BILANCERE SMITH MACHINE PANCA PIANA", group: "PETTO", series: 2, rep: "8/10", rec: 90 },
-                    { name: "SPINTE CON MANUBRI PANCA INCLINATA", group: "PETTO", series: 2, rep: "8/10", rec: 90 },
-                    { name: "CROCI AI CAVI ALTI", group: "PETTO", series: 2, rep: "8/10", rec: 90 },
-                    { name: "ALZATE LATERALI CON MANUBRI", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
-                    { name: "MILITARY PRESS SMITH MACHINE", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
+                    { name: "DISTENSIONI PANCA INCLINATA 30°", group: "PETTO", series: 3, rep: "6/8", rec: 90 },
+                    { name: "CROCI PECTORAL MACHINE", group: "PETTO", series: 3, rep: "8/10", rec: 90 },
+                    { name: "CHEST PRESS PANCA ROSSA", group: "PETTO", series: 3, rep: "6/8", rec: 90 },
+                    { name: "CROCI AI CAVI ALTI", group: "PETTO", series: 3, rep: "8/10", rec: 90 },
+                    { name: "ALZATE LATERALI AI CAVI", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
+                    { name: "ALZATE FRONTALI CON MANUBRI", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
                     { name: "MACHINE REVERSE FLY", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
                     { name: "CURL ALTERNATO PANCA INCLINATA", group: "BICIPITI", series: 3, rep: "8/10", rec: 90 },
-                    { name: "CURL BILANCERE A Z PANCA SCOTT", group: "BICIPITI", series: 3, rep: "8/10", rec: 90 },
-                    { name: "CURL HAMMER AI CAVI BASSI CON CORDA", group: "BICIPITI", series: 2, rep: "8/10", rec: 90 }
+                    { name: "CURL BILANCERE A Z", group: "BICIPITI", series: 3, rep: "6/8", rec: 90 },
+                    { name: "CURL HAMMER AI CAVI BASSI CON CORDA", group: "BICIPITI", series: 3, rep: "8/10", rec: 90 }
                 ],
-                cardio: [
-                    { name: "CLIMBING", defaultMin: "10" },
-                    { name: "WALKING", defaultMin: "15" }
-                ]
+                cardio: []
             },
             "2": {
-                title: "ADDOMINALI - SCHIENA - TRICIPITI - AVAMBRACCIO",
+                title: "SCHIENA - TRICIPITI - CARDIO",
                 exercises: [
-                    { name: "ADDOMINAL MACHINE", group: "ADDOMINALI", series: 3, rep: "15", rec: 90 },
-                    { name: "LAT MACHINE AVANTI PRESA LARGA", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
+                    { name: "LAT MACHINE AVANTI PRESA MEDIA", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
                     { name: "PULLOVER AL CAVO ALTO", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
-                    { name: "RACK PULL", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
-                    { name: "LOW ROW MACHINE HAMMER", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
+                    { name: "FACE PULL CON CORDA", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
+                    { name: "PULLEY PRESA STRETTA", group: "SCHIENA", series: 3, rep: "8/10", rec: 90 },
                     { name: "HIPEREXTENSION", group: "SCHIENA", series: 3, rep: "15", rec: 90 },
-                    { name: "FRENCH PRESS CAVO BASSO", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 },
-                    { name: "FRENCH PRESS CON BILANCERE A Z SU PANCA PIANA", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 },
-                    { name: "PUSH DOWN CAVO ALTO", group: "TRICIPITI", series: 2, rep: "8/10", rec: 90 },
-                    { name: "CURL INVERSO CON BILANCERE SU PANCA", group: "AVAMBRACCIO", series: 3, rep: "10", rec: 90 }
+                    { name: "ESTENSIONE SOPRA LA TESTA CAVO BASSO CON CORDA", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "PUSH DOWN CAVO ALTO", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "PUSHDOWN SINGOLO PRESA INVERSA AL CAVO ALTO", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 }
                 ],
                 cardio: [
-                    { name: "CLIMBING", defaultMin: "10" },
-                    { name: "WALKING", defaultMin: "15" }
+                    { name: "CARDIO", defaultMin: "15" }
                 ]
             },
             "3": {
-                title: "ADDOMINALI - GAMBE",
+                title: "ADDOMINALI - GAMBE - AVAMBRACCIO",
                 exercises: [
                     { name: "PLANK", group: "ADDOMINALI", series: 3, rep: "60\"", rec: 60 },
                     { name: "ADDUTTORI", group: "QUADRICIPITI", series: 3, rep: "12", rec: 90 },
                     { name: "ABDUTTORI", group: "QUADRICIPITI", series: 3, rep: "12", rec: 90 },
                     { name: "LEG EXTENSION", group: "QUADRICIPITI", series: 3, rep: "8/10", rec: 90 },
                     { name: "LEG PRESS 45", group: "QUADRICIPITI", series: 2, rep: "8/10", rec: 90 },
-                    { name: "PENDULUM SQUAT MACHINE", group: "QUADRICIPITI", series: 2, rep: "8/10", rec: 90 },
-                    { name: "AFFONDI ALTERNATI CON MANUBRI", group: "QUADRICIPITI", series: 2, rep: "12", rec: 90 },
-                    { name: "LEG CURL", group: "QUADRICIPITI", series: 3, rep: "8/10", rec: 90 },
-                    { name: "CALF PRESSA", group: "POLPACCI", series: 3, rep: "10", rec: 90 }
+                    { name: "HACK SQUAT", group: "QUADRICIPITI", series: 2, rep: "8/10", rec: 90 },
+                    { name: "LEG CURL DISTESO", group: "FEMORALI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "CALF PRESSA", group: "POLPACCI", series: 3, rep: "10", rec: 90 },
+                    { name: "CURL INVERSO AL CAVO", group: "AVAMBRACCIO", series: 3, rep: "10", rec: 90 }
                 ],
-                cardio: [
-                    { name: "WALKING", defaultMin: "25" }
-                ]
+                cardio: []
             },
             "4": {
-                title: "ADDOMINALI - PETTO - SPALLE - MIX",
+                title: "ADDOMINALI - TOTAL BODY",
                 exercises: [
-                    { name: "PLANK LATERALE", group: "ADDOMINALI", series: 3, rep: "45\"", rec: 60 },
+                    { name: "ADDOMINAL MACHINE", group: "ADDOMINALI", series: 3, rep: "15", rec: 60 },
                     { name: "CROCI CON MANUBRI PANCA INCLINATA", group: "PETTO", series: 3, rep: "8-10", rec: 90 },
-                    { name: "PRESS", group: "PETTO", series: 3, rep: "8-10", rec: 90 },
-                    { name: "ARNOLD PRESS DA SEDUTI CON MANUBRI", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
-                    { name: "ALZATE LATERALI AI CAVI", group: "SPALLE", series: 3, rep: "8/10", rec: 90 },
-                    { name: "CURL AI CAVI ALTI", group: "BICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "SPINTE PANCA PIANA SMITH MACHINE", group: "PETTO", series: 2, rep: "8-10", rec: 90 },
+                    { name: "SHOULDER PRESS ALLA SMITH MACHINE", group: "SPALLE", series: 2, rep: "8/10", rec: 90 },
+                    { name: "APERTURE POSTERIORI AI CAVI ALTI", group: "SPALLE", series: 2, rep: "8/10", rec: 90 },
+                    { name: "CURL CON MANUBRI", group: "BICIPITI", series: 3, rep: "8/10", rec: 90 },
                     { name: "TRAZIONI ALLA SBARRA", group: "DORSALI", series: 3, rep: "6/8", rec: 90 },
-                    { name: "FRENCH PRESS CAVO BASSO", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 }
+                    { name: "FRENCH PRESS CAVO ALTO CON CORDA", group: "TRICIPITI", series: 3, rep: "8/10", rec: 90 },
+                    { name: "AFFONDI ALTERNATI CON MANUBRI", group: "GAMBE", series: 3, rep: "12/13/14", rec: 90, customReps: ["12", "13", "14"] }
                 ],
                 cardio: [
-                    { name: "CLIMBING", defaultMin: "5" },
-                    { name: "WALKING", defaultMin: "15", defaultPendenza: "7" }
+                    { name: "WALKING", defaultMin: "20" }
                 ]
             }
         };
@@ -544,10 +536,11 @@
                     for (let s = 1; s <= ex.series; s++) {
                         const inputWeightId = "w_" + dayId + "_" + exIndex + "_" + s + "_kg";
                         const inputRepId = "w_" + dayId + "_" + exIndex + "_" + s + "_rep";
+                        const repLabel = ex.customReps ? ex.customReps[s - 1] : ex.rep;
                         html += `
                                 <tr class="series-row">
                                     <td>${s}</td>
-                                    <td><span style="color: var(--text-muted); font-size:12px; font-weight:bold;">${ex.rep}</span></td>
+                                    <td><span style="color: var(--text-muted); font-size:12px; font-weight:bold;">${repLabel}</span></td>
                                     <td>
                                         <input type="text" inputmode="numeric" pattern="[0-9]*" id="${inputRepId}" class="input-rep-fatte" placeholder="-" oninput="saveData('${inputRepId}', this.value)">
                                     </td>
@@ -563,40 +556,40 @@
                     html += `</tbody></table></div>`;
                 });
 
-                html += `<div class="macro-gruppo">CARDIO</div>`;
-                dayData.cardio.forEach((c, cIndex) => {
-                    const minId = "c_" + dayId + "_" + cIndex + "_min";
-                    const pendId = "c_" + dayId + "_" + cIndex + "_pend";
-                    const velId = "c_" + dayId + "_" + cIndex + "_vel";
-                    const distId = "c_" + dayId + "_" + cIndex + "_dist";
+                if (dayData.cardio && dayData.cardio.length > 0) {
+                    html += `<div class="macro-gruppo">CARDIO</div>`;
+                    dayData.cardio.forEach((c, cIndex) => {
+                        const minId = "c_" + dayId + "_" + cIndex + "_min";
+                        const pendId = "c_" + dayId + "_" + cIndex + "_pend";
+                        const velId = "c_" + dayId + "_" + cIndex + "_vel";
+                        const distId = "c_" + dayId + "_" + cIndex + "_dist";
 
-                    const pendenzaPredefinita = c.defaultPendenza ? c.defaultPendenza : "";
-
-                    html += `
-                    <div class="exercise-card" style="border-left-color: var(--accent);">
-                        <div class="exercise-name">${c.name}</div>
-                        <div class="cardio-inputs">
-                            <div class="cardio-field">
-                                <label>Minuti</label>
-                                <input type="number" id="${minId}" placeholder="${c.defaultMin}" min="5" max="60" step="5" oninput="saveData('${minId}', this.value)">
+                        html += `
+                        <div class="exercise-card" style="border-left-color: var(--accent);">
+                            <div class="exercise-name">${c.name}</div>
+                            <div class="cardio-inputs">
+                                <div class="cardio-field">
+                                    <label>Minuti</label>
+                                    <input type="number" id="${minId}" placeholder="${c.defaultMin}" min="5" max="60" step="5" oninput="saveData('${minId}', this.value)">
+                                </div>
+                                <div class="cardio-field">
+                                    <label>Pendenza %</label>
+                                    <input type="text" id="${pendId}" oninput="saveData('${pendId}', this.value)">
+                                </div>
+                                <div class="cardio-field">
+                                    <label>Velocità</label>
+                                    <input type="text" id="${velId}" placeholder="km/h" oninput="saveData('${velId}', this.value)">
+                                </div>
                             </div>
-                            <div class="cardio-field">
-                                <label>Pendenza %</label>
-                                <input type="text" id="${pendId}" placeholder="${pendenzaPredefinita}" oninput="saveData('${pendId}', this.value)">
+                            <div class="cardio-inputs" style="margin-top:6px;">
+                                <div class="cardio-field" style="grid-column: span 3;">
+                                    <label>Distanza Km</label>
+                                    <input type="text" id="${distId}" placeholder="0.00" oninput="saveData('${distId}', this.value)">
+                                </div>
                             </div>
-                            <div class="cardio-field">
-                                <label>Velocità</label>
-                                <input type="text" id="${velId}" placeholder="km/h" oninput="saveData('${velId}', this.value)">
-                            </div>
-                        </div>
-                        <div class="cardio-inputs" style="margin-top:6px;">
-                            <div class="cardio-field" style="grid-column: span 3;">
-                                <label>Distanza Km</label>
-                                <input type="text" id="${distId}" placeholder="0.00" oninput="saveData('${distId}', this.value)">
-                            </div>
-                        </div>
-                    </div>`;
-                });
+                        </div>`;
+                    });
+                }
 
                 html += `<button class="btn-action-save" onclick="logWorkoutSessionWithDoubleConfirm('${dayId}')">Salva Allenamento di Oggi</button>`;
 
